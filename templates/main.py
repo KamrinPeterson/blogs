@@ -3,14 +3,16 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://get-it-done:beproductive@localhost:8889/get-it-done'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:root@localhost:8889/build-a-blog'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
 
-class Task(db.Model):
+class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120))
+    body = db.Column(db.String(2000))
     name = db.Column(db.String(120))
     completed = db.Column(db.Boolean)
 
@@ -19,7 +21,7 @@ class Task(db.Model):
         self.completed = False
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/blog', methods=['POST', 'GET'])
 def index():
 
     if request.method == 'POST':
@@ -34,7 +36,7 @@ def index():
         tasks=tasks, completed_tasks=completed_tasks)
 
 
-@app.route('/delete-task', methods=['POST'])
+@app.route('/newpost', methods=['POST'])
 def delete_task():
 
     task_id = int(request.form['task-id'])
