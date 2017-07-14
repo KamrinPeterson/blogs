@@ -48,10 +48,10 @@ def index():
         title = request.form['title']
         body = request.form['body']
         if title == '':
-            flash('Uh Oh! Please enter a title for your blog post.')
+            flash('Uh Oh! Please enter a title for your blog post.', 'error')
             return render_template('newpost.html', body=body)
         if body == '':
-            flash('Uh OH! Please enter a thing or two about your blog post.')
+            flash('Uh OH! Please enter a thing or two about your blog post.', 'error')
             return render_template('newpost.html', title=title)
         blog = Blog(title=title, body=body)
         db.session.add(blog)
