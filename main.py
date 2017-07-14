@@ -18,6 +18,17 @@ class Blog(db.Model):
         self.title = title
         self.body = body
 
+#create a user class
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20))
+    password = db.Column(db.String(20))
+    #blogs = db.Column(db.Blog)
+
+    def  __init__(self, title, body):
+        self.title = title
+        self.body = body
+
 
 @app.route('/blog', methods=['GET']) 
 def blog_posts():
