@@ -13,6 +13,7 @@ class Blog(db.Model):
     title = db.Column(db.String(120))
     body = db.Column(db.String(2000))
     name = db.Column(db.String(120))
+    owner_id = db.Column(ForeignKey(User.id), primary_key=True)
 
     def  __init__(self, title, body):
         self.title = title
@@ -23,13 +24,13 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20))
     password = db.Column(db.String(20))
-    #blogs = db.Column(db.Blog)
+    blogs = relationship(Blog, uselist=False) #dont know if I need this uselist
 
     def  __init__(self, title, body):
         self.title = title
         self.body = body
 
-
+#add in user that ties user to the blog post
 @app.route('/blog', methods=['GET']) 
 def blog_posts():
     print(request.args)
@@ -39,6 +40,7 @@ def blog_posts():
     else:
         new_id = request.args.get('id')
         blog_post = db.session.query(Blog).filter_by(id=new_id).first()
+        user_post = db.session.query(User)
         body = blog_post.body
         title = blog_post.title
         return render_template('blogpost.html', title=title, body=body)
@@ -54,7 +56,7 @@ def home():
 @app.route('/newpost', methods=['POST', 'GET'])
 def index():
     
-    
+ #added user into return function   
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
@@ -62,12 +64,14 @@ def index():
             flash('Uh Oh! Please enter a title for your blog post.', 'error')
             return render_template('newpost.html', body=body)
         if body == '':
-            flash('Uh OH! Please enter a thing or two about your blog post.', 'error')
+            flash('Uh Oh! Please enter a thing or two about your blog post.', 'error')
             return render_template('newpost.html', title=title)
         blog = Blog(title=title, body=body)
+        user = User(username=username)
         db.session.add(blog)
+        db.session.add(user)
         db.session.commit()
-        return render_template('blogpost.html', title=title, body=body)
+        return render_template('blogpost.html', title=title, body=body, username=username)
     
     return render_template('newpost.html')
 
