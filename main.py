@@ -13,7 +13,7 @@ class Blog(db.Model):
     title = db.Column(db.String(120))
     body = db.Column(db.String(2000))
     name = db.Column(db.String(120))
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
 
     def  __init__(self, title, body):
         self.title = title
@@ -21,14 +21,15 @@ class Blog(db.Model):
 
 #create a user class
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20))
-    password = db.Column(db.String(20))
-    blogs = relationship('Blog', uselist=False) #dont know if I need this uselist
 
-    def  __init__(self, title, body):
-        self.title = title
-        self.body = body
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
+    tasks = db.relationship('Blog', backref='owner')
+
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password
 
 #create user login
 @app.before_request
