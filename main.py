@@ -13,7 +13,7 @@ class Blog(db.Model):
     title = db.Column(db.String(120))
     body = db.Column(db.String(2000))
     name = db.Column(db.String(120))
-    owner_id = db.Column(ForeignKey(User.id), primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
 
     def  __init__(self, title, body):
         self.title = title
@@ -24,11 +24,59 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20))
     password = db.Column(db.String(20))
-    blogs = relationship(Blog, uselist=False) #dont know if I need this uselist
+    blogs = relationship('Blog', uselist=False) #dont know if I need this uselist
 
     def  __init__(self, title, body):
         self.title = title
         self.body = body
+
+#create user login
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'register']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
+
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if user and user.password == password:
+            session['email'] = email
+            flash("Logged in")
+            return redirect('/')
+        else:
+            flash('User password incorrect, or user does not exist', 'error')
+
+    return render_template('login.html')
+
+#used to signup
+@app.route('/signup', methods=['POST', 'GET'])
+def register():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        verify = request.form['verify']
+
+        # TODO - validate user's data
+
+        existing_user = User.query.filter_by(email=email).first()
+        if not existing_user:
+            new_user = User(email, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['email'] = email
+            return redirect('/')
+        else:
+            # TODO - user better response messaging
+            return "<h1>Duplicate user</h1>"
+
+    return render_template('signup.html')
+
+
 
 #add in user that ties user to the blog post
 @app.route('/blog', methods=['GET']) 
